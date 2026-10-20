@@ -45,6 +45,18 @@ do admin e conta do jogador atualizadas **em tempo real**.
 Schema completo em [`db/schema.sql`](db/schema.sql). Tabelas com prefixo `poker_`
 (hospedadas temporariamente no projeto Supabase existente por limite do plano free).
 
+## Onde está cada coisa
+
+| Camada | Local |
+| --- | --- |
+| Código | GitHub `angeline22ak/App-Poker`, branch `mvp` |
+| Site no ar | <https://app-poker-eight.vercel.app> (Vercel, projeto `app-poker`, deploy a partir do branch `mvp`) |
+| Banco + Realtime | Supabase, projeto `barril-app` (`zzgemyzcspzcsffaszsx`) — tabelas/funções com prefixo `poker_` |
+| QR da mesa | `/qr.html` (página imprimível) |
+
+Os PINs (admin e jogadores) ficam **apenas no banco** (hash bcrypt) — não estão
+neste repositório. O admin altera/cria jogadores pelo próprio app.
+
 ## Desenvolvimento
 
 É um site estático — basta servir a raiz do repositório:

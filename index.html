@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Mesa Poker</title>
+<meta name="description" content="Gestão financeira de mesa de poker cash game: buy-in, rebuy, cash-out e rake ao vivo.">
+<meta name="theme-color" content="#0b1512">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Mesa Poker">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand" id="brand-home" role="button" tabindex="0">
+    <svg width="26" height="26" viewBox="0 0 48 48" aria-hidden="true">
+      <circle cx="24" cy="24" r="21" fill="none" stroke="#e8c15a" stroke-width="5" stroke-dasharray="11 7"/>
+      <circle cx="24" cy="24" r="12" fill="#e8c15a"/>
+      <text x="24" y="29" text-anchor="middle" font-size="14" font-weight="700" fill="#0b1512">♠</text>
+    </svg>
+    <span>Mesa Poker</span>
+  </div>
+  <div class="top-actions">
+    <span id="live-dot" class="live-dot" title="Conexão em tempo real">● ao vivo</span>
+    <button id="btn-install" class="btn btn-ghost btn-sm hidden">Instalar app</button>
+    <button id="btn-logout" class="btn btn-ghost btn-sm hidden">Sair</button>
+  </div>
+</header>
+
+<main id="app"><div class="loading">Carregando…</div></main>
+
+<div id="toast" class="toast hidden"></div>
+
+<div id="ios-sheet" class="sheet hidden">
+  <div class="sheet-card">
+    <h3>Instalar na tela inicial</h3>
+    <p>No iPhone/iPad (Safari):</p>
+    <ol>
+      <li>Toque no botão <strong>Compartilhar</strong> <span class="ios-share">⎙</span> na barra do navegador</li>
+      <li>Role e toque em <strong>Adicionar à Tela de Início</strong></li>
+      <li>Confirme em <strong>Adicionar</strong></li>
+    </ol>
+    <p>O app aparece ao lado dos seus outros aplicativos.</p>
+    <button class="btn btn-primary" onclick="document.getElementById('ios-sheet').classList.add('hidden')">Entendi</button>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.min.js"></script>
+<script src="config.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

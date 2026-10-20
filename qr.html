@@ -4,44 +4,66 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>QR da Mesa</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
 <style>
-  :root { --bg: #0b1512; --ink: #eef5f1; --gold: #e8c15a; }
+  :root { --bg: #0b1512; --ink: #eef5f1; --gold: #e8c15a; --gold-deep: #c3952f; }
   * { box-sizing: border-box; }
   body {
-    margin: 0; min-height: 100dvh; background: var(--bg); color: var(--ink);
+    margin: 0; min-height: 100dvh; color: var(--ink);
+    background:
+      radial-gradient(130% 90% at 50% -10%, #132a20 0%, rgba(19,42,32,0) 60%),
+      radial-gradient(120% 70% at 50% 115%, #10231a 0%, rgba(16,35,26,0) 55%),
+      var(--bg);
     font: 16px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     display: flex; align-items: center; justify-content: center; padding: 24px 16px;
   }
   .sheet {
-    background: #fff; color: #111; border-radius: 20px; padding: 36px 32px;
+    background: #fffdf7; color: #17211b; border-radius: 22px; padding: 34px 30px;
+    border: 1px solid rgba(232,193,90,.5);
+    box-shadow: 0 24px 60px rgba(0,0,0,.5);
     text-align: center; max-width: 420px; width: 100%;
   }
-  .sheet h1 { font-size: 26px; margin: 0 0 4px; }
-  .sheet .sub { color: #555; font-size: 15px; margin: 0 0 22px; }
-  #qr { display: flex; justify-content: center; margin: 0 auto 20px; }
-  #qr img, #qr canvas { width: 260px !important; height: 260px !important; }
-  .url { font-size: 13px; color: #777; word-break: break-all; }
-  .perks { margin: 18px 0 0; font-size: 14px; color: #333; text-align: left; }
-  .perks li { margin: 4px 0; }
+  .sheet h1 {
+    font-family: "Playfair Display", Georgia, serif;
+    font-size: 30px; font-weight: 800; margin: 0 0 2px; letter-spacing: .01em;
+  }
+  .sheet h1 .s { color: var(--gold-deep); }
+  .suits { display: flex; align-items: center; justify-content: center; gap: 12px; margin: 6px 0 10px; font-size: 14px; color: #1a241e; }
+  .suits .r { color: #c2443a; }
+  .suits::before, .suits::after { content: ""; width: 54px; height: 1px; background: linear-gradient(90deg, transparent, rgba(195,149,47,.75)); }
+  .suits::after { background: linear-gradient(90deg, rgba(195,149,47,.75), transparent); }
+  .sheet .sub { color: #555; font-size: 15px; margin: 0 0 20px; }
+  .qr-frame {
+    display: inline-block; padding: 14px; border-radius: 18px; margin: 0 auto 16px;
+    border: 2px solid var(--gold-deep); background: #fff;
+  }
+  #qr { display: flex; justify-content: center; }
+  #qr img, #qr canvas { width: 240px !important; height: 240px !important; }
+  .url { font-size: 13px; color: #777; word-break: break-all; margin: 0; }
+  .perks { margin: 18px 0 0; padding-left: 4px; font-size: 14px; color: #333; text-align: left; list-style: none; }
+  .perks li { margin: 6px 0; }
   .actions { margin-top: 22px; display: flex; gap: 10px; justify-content: center; }
   .btn {
     border: none; border-radius: 12px; padding: 12px 18px; font-size: 15px;
     font-weight: 700; cursor: pointer;
   }
-  .btn-gold { background: var(--gold); color: #0b1512; }
+  .btn-gold { background: linear-gradient(180deg, #f4d98c, var(--gold) 55%, var(--gold-deep)); color: #201705; box-shadow: 0 4px 14px rgba(232,193,90,.35); }
   .btn-ghost { background: #eee; color: #333; }
   @media print {
     body { background: #fff; padding: 0; }
-    .sheet { box-shadow: none; max-width: none; }
+    .sheet { box-shadow: none; max-width: none; border: none; }
     .actions { display: none; }
   }
 </style>
 </head>
 <body>
   <div class="sheet">
-    <h1>♠ Mesa Poker</h1>
+    <h1><span class="s">♠</span> Mesa Poker</h1>
+    <div class="suits" aria-hidden="true"><span>♠</span><span class="r">♥</span><span>♣</span><span class="r">♦</span></div>
     <p class="sub">Aponte a câmera do celular e acompanhe a mesa ao vivo</p>
-    <div id="qr"></div>
+    <div class="qr-frame"><div id="qr"></div></div>
     <p class="url" id="url-label"></p>
     <ul class="perks">
       <li>📊 Sua conta na mesa em tempo real</li>
@@ -58,7 +80,7 @@
     var target = location.origin + '/';
     document.getElementById('url-label').textContent = target;
     new QRCode(document.getElementById('qr'), {
-      text: target, width: 260, height: 260,
+      text: target, width: 240, height: 240,
       colorDark: '#0b1512', colorLight: '#ffffff',
       correctLevel: QRCode.CorrectLevel.M
     });

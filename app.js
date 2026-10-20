@@ -160,7 +160,10 @@
     if (v === 'live') return renderLive();
   }
 
-  function go(view) { S.view = view; render(); window.scrollTo(0, 0); }
+  function go(view) {
+    S.view = view; render(); window.scrollTo(0, 0);
+    $app.classList.remove('view-anim'); void $app.offsetWidth; $app.classList.add('view-anim');
+  }
 
   function renderHome() {
     $app.innerHTML = `
@@ -170,6 +173,7 @@
         </div>
         <h1>Mesa Poker</h1>
         <p class="sub">Controle financeiro da mesa: buy-in, rebuy, cash-out e rake — em tempo real.</p>
+        <div class="suits" aria-hidden="true"><span>♠</span><span class="r">♥</span><span>♣</span><span class="r">♦</span></div>
       </div>
       <div class="home-actions">
         <button class="btn btn-primary btn-block" id="go-live">📺 Ver a mesa ao vivo</button>
@@ -275,7 +279,7 @@
         <div class="chip-pad">
           ${chips.map(ch => `
             <div class="chip-row">
-              <span class="chip-dot" style="background:${esc(ch.hex)}"></span>
+              <span class="chip-dot" style="--chip:${esc(ch.hex)}"></span>
               <span class="chip-name">${esc(ch.color)}<small>${fmt(ch.value)}</small></span>
               <button class="chip-btn" data-c="${esc(ch.color)}" data-d="-1">−</button>
               <span class="chip-count">${S.chipCounts[ch.color] || 0}</span>

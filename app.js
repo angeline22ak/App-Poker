@@ -41,6 +41,26 @@
 
   function debounce(fn, ms) { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); }; }
 
+  // ---------- ícones (SVG de linha, sem emoji — padrão site-design) ----------
+  const ICONS = {
+    eye: '<path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/>',
+    user: '<path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>',
+    userplus: '<path d="M2 21a8 8 0 0 1 13.3-6"/><circle cx="10" cy="8" r="5"/><path d="M19 16v6M22 19h-6"/>',
+    key: '<path d="m21 2-9.6 9.6"/><circle cx="7.5" cy="15.5" r="5.5"/><path d="m15.5 7.5 3 3L22 7l-3-3"/>',
+    install: '<path d="M12 15V3M6 9l6 6 6-6"/><path d="M19 21H5"/>',
+    chip: '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.2"/><path d="M12 3v3.5M12 17.5V21M3 12h3.5M17.5 12H21M5.8 5.8l2.5 2.5M15.7 15.7l2.5 2.5M18.2 5.8l-2.5 2.5M8.3 15.7l-2.5 2.5"/>',
+    cash: '<rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/><path d="M6 12h.01M18 12h.01"/>',
+    gift: '<rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"/><path d="M7.5 8a2.5 2.5 0 0 1 0-5C9.5 3 11 5.5 12 8c1-2.5 2.5-5 4.5-5a2.5 2.5 0 0 1 0 5"/>',
+    clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/>',
+    plus: '<circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/>',
+    sliders: '<path d="M21 4h-7M10 4H3M21 12h-9M8 12H3M21 20h-5M12 20H3"/><path d="M14 2v4M8 10v4M16 18v4"/>',
+    qr: '<rect x="3" y="3" width="5" height="5" rx="1"/><rect x="16" y="3" width="5" height="5" rx="1"/><rect x="3" y="16" width="5" height="5" rx="1"/><path d="M21 16h-3a2 2 0 0 0-2 2v3M21 21v.01M12 7v3a2 2 0 0 1-2 2H7M3 12h.01M12 3h.01M12 16v.01M16 12h1M21 12v.01M12 21v-1"/>',
+    lock: '<rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>',
+    fuel: '<path d="M3 22h12M4 9h10M14 22V4a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v18"/><path d="M14 13h2a2 2 0 0 1 2 2v2a2 2 0 0 0 4 0V9.8a2 2 0 0 0-.6-1.4L18 5"/>',
+    food: '<path d="M3 2v7a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2V2"/><path d="M6 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6a2 2 0 0 0 2 2h3Z"/><path d="M21 15v7"/>',
+  };
+  const ic = (n) => `<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[n] || ''}</svg>`;
+
   // ---------- dados ----------
   async function loadAll() {
     const [se, pl, br, ba] = await Promise.all([
@@ -176,10 +196,10 @@
         <div class="suits" aria-hidden="true"><span>♠</span><span class="r">♥</span><span>♣</span><span class="r">♦</span></div>
       </div>
       <div class="home-actions">
-        <button class="btn btn-primary btn-block" id="go-live">📺 Ver a mesa ao vivo</button>
-        <button class="btn btn-felt btn-block" id="go-player">🙋 Sou jogador — minha conta</button>
-        <button class="btn btn-block" id="go-admin">🔑 Sou admin da mesa</button>
-        <button class="btn btn-ghost btn-block" id="go-install">📲 Instalar na tela inicial</button>
+        <button class="btn btn-primary btn-block" id="go-live">${ic('eye')} Ver a mesa ao vivo</button>
+        <button class="btn btn-felt btn-block" id="go-player">${ic('user')} Sou jogador — minha conta</button>
+        <button class="btn btn-block" id="go-admin">${ic('key')} Sou admin da mesa</button>
+        <button class="btn btn-ghost btn-block" id="go-install">${ic('install')} Instalar na tela inicial</button>
       </div>
       <p class="footnote">MVP de teste · os dados são atualizados ao vivo em todos os aparelhos</p>`;
     document.getElementById('go-live').onclick = () => go('live');
@@ -274,7 +294,7 @@
       ${liveTiles(st)}
       ${c.status === 'open' ? `
       <div class="card">
-        <h3>🪙 Registrar rake da mão</h3>
+        <h3>${ic('chip')} Registrar rake da mão</h3>
         <p class="sub">Toque nas fichas que a casa recolheu nesta mão.</p>
         <div class="chip-pad">
           ${chips.map(ch => `
@@ -343,7 +363,7 @@
     el.innerHTML = `
       ${c && c.status === 'open' ? `
       <div class="card">
-        <h3>💸 Lançar movimento</h3>
+        <h3>${ic('cash')} Lançar movimento</h3>
         <label>Jogador</label>
         <select id="tx-player">${S.players.map(p => `<option value="${p.id}">${esc(p.name)}</option>`).join('') || '<option value="">(cadastre jogadores na aba Jogadores)</option>'}</select>
         <div class="seg">
@@ -393,7 +413,7 @@
   function renderTabJog(el) {
     el.innerHTML = `
       <div class="card">
-        <h3>➕ Novo jogador</h3>
+        <h3>${ic('userplus')} Novo jogador</h3>
         <label>Nome</label><input id="pl-name" placeholder="Nome do jogador">
         <label>PIN (4 a 8 dígitos — o jogador usa para ver a conta)</label>
         <input id="pl-pin" inputmode="numeric" placeholder="ex.: 1234">
@@ -423,8 +443,8 @@
   }
 
   // ---------- BÔNUS ----------
-  const BONUS_ICON = { gasolina: '⛽', comida: '🍔' };
-  const bIcon = (t) => BONUS_ICON[t] || '🎁';
+  const BONUS_ICON = { gasolina: 'fuel', comida: 'food' };
+  const bIcon = (t) => ic(BONUS_ICON[t] || 'gift');
   const hhmm = (min) => `${Math.floor(min / 60)}h${String(Math.round(min) % 60).padStart(2, '0')}`;
 
   function bonusStatus(a) {
@@ -450,7 +470,7 @@
     const hasAward = (pid, type) => S.awards.some(a => a.player_id === pid && a.type === type && a.session_id === S.sessionId);
     el.innerHTML = `
       <div class="card">
-        <h3>🎁 Regras dos bônus</h3>
+        <h3>${ic('gift')} Regras dos bônus</h3>
         <p class="sub">O jogador ganha ao completar o tempo mínimo de mesa. A validade conta a partir do dia em que ganhou.</p>
         ${rules.map(r => `
         <div class="bonus-rule" data-type="${esc(r.type)}">
@@ -467,7 +487,7 @@
         </div>`).join('') || '<p class="sub">Nenhuma regra cadastrada.</p>'}
       </div>
       <div class="card">
-        <h3>⏱️ Quem já pode ganhar (mesa atual)</h3>
+        <h3>${ic('clock')} Quem já pode ganhar (mesa atual)</h3>
         <div class="list">${!c ? '<p class="sub">Nenhuma mesa selecionada.</p>' : inSession.map(p => {
           const min = minutesAtTable(p.id);
           return `<div class="row"><div class="grow"><strong>${esc(p.name)}</strong>
@@ -513,7 +533,7 @@
       const exp = new Date(Date.now() + (r ? r.valid_days : 7) * 864e5).toISOString();
       try {
         await rpc('poker_award_bonus', { p_admin_pin: S.adminPin, p_player_id: b.dataset.award, p_session_id: S.sessionId, p_type: b.dataset.bt, p_amount: null, p_expires_at: exp });
-        toast('Bônus concedido 🎁'); await loadAll(); render();
+        toast('Bônus concedido'); await loadAll(); render();
       } catch (e) { toast(e.message, true); }
     });
     el.querySelectorAll('[data-redeem]').forEach(b => b.onclick = async () => {
@@ -540,13 +560,13 @@
     const chips = c ? (c.chip_values || []) : [];
     el.innerHTML = `
       <div class="card">
-        <h3>🆕 Nova mesa</h3>
+        <h3>${ic('plus')} Nova mesa</h3>
         <label>Nome</label><input id="new-sess" placeholder="Mesa de sexta">
         <button class="btn btn-primary btn-block" id="mk-sess">Abrir nova mesa</button>
       </div>
       ${c ? `
       <div class="card">
-        <h3>⚙️ Mesa atual: ${esc(c.name)}</h3>
+        <h3>${ic('sliders')} Mesa atual: ${esc(c.name)}</h3>
         <label>Rake da casa (%)</label>
         <input id="cfg-rake" inputmode="decimal" value="${c.rake_percent}">
         <label>Teto do rake por mão (R$ — vazio = sem teto)</label>
@@ -564,15 +584,15 @@
         <div class="btn-row" style="margin-top:12px">
           <button class="btn btn-primary" id="cfg-save">Salvar configurações</button>
         </div>
-        ${c.status === 'open' ? '<button class="btn btn-danger btn-block" id="cfg-close" style="margin-top:10px">🔒 Fechar mesa</button>' : ''}
+        ${c.status === 'open' ? `<button class="btn btn-danger btn-block" id="cfg-close" style="margin-top:10px">${ic('lock')} Fechar mesa</button>` : ''}
       </div>` : ''}
       <div class="card">
-        <h3>📱 QR Code da mesa</h3>
+        <h3>${ic('qr')} QR Code da mesa</h3>
         <p class="sub">Imprima e deixe na mesa — o jogador escaneia e cai direto no app.</p>
         <button class="btn btn-block" id="open-qr">Abrir página do QR (imprimir)</button>
       </div>
       <div class="card">
-        <h3>🔑 Trocar PIN do admin</h3>
+        <h3>${ic('key')} Trocar PIN do admin</h3>
         <label>Novo PIN (4 a 8 dígitos)</label>
         <input id="new-pin" inputmode="numeric" placeholder="novo PIN">
         <button class="btn btn-block" id="pin-save">Trocar PIN</button>
@@ -645,7 +665,7 @@
     const ps = playerStats(S.playerId);
     const open = st.c && st.c.status === 'open';
     $app.innerHTML = `
-      <h1>Olá, ${esc(S.playerName)} 👋</h1>
+      <h1>Olá, ${esc(S.playerName)}</h1>
       ${sessionPicker()}
       ${tiles([
         { label: open ? 'VOCÊ COLOCOU NA MESA' : 'RESULTADO DA SESSÃO', value: open ? fmt(ps.buy) : fmt(ps.result), hero: true, note: open ? 'buy-in + rebuys' : 'saques − compras' },
@@ -662,7 +682,7 @@
         }).join('') || '<p class="sub">Nenhum movimento nesta mesa.</p>'}</div>
       </div>
       <div class="card">
-        <h3>🎁 Meus bônus</h3>
+        <h3>${ic('gift')} Meus bônus</h3>
         <div class="list">${S.awards.filter(a => a.player_id === S.playerId).map(a => {
           const stt = bonusStatus(a);
           return `<div class="row"><div class="grow">${bIcon(a.type)} <strong>${fmt(a.amount)}</strong>
@@ -714,7 +734,7 @@
   function isIOS() { return /iphone|ipad|ipod/i.test(navigator.userAgent); }
   function isStandalone() { return window.matchMedia('(display-mode: standalone)').matches || navigator.standalone; }
   async function tryInstall() {
-    if (isStandalone()) return toast('O app já está instalado 🎉');
+    if (isStandalone()) return toast('O app já está instalado');
     if (deferredPrompt) { deferredPrompt.prompt(); const r = await deferredPrompt.userChoice; if (r.outcome === 'accepted') toast('App instalado!'); deferredPrompt = null; return; }
     if (isIOS()) return document.getElementById('ios-sheet').classList.remove('hidden');
     toast('No menu do navegador, use “Adicionar à tela inicial”.');

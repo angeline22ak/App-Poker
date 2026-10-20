@@ -78,9 +78,17 @@ h2 {
 }
 h2::after { content: ""; flex: 1; height: 1px; background: linear-gradient(90deg, var(--border-gold), transparent); }
 h3 {
+  display: flex; align-items: center; gap: 7px;
   font-size: 12.5px; font-weight: 800; text-transform: uppercase; letter-spacing: .09em;
   color: rgba(232, 193, 90, .85); margin: 0 0 10px;
 }
+
+/* Ícones SVG de linha (sem emoji) */
+.ic { width: 1.2em; height: 1.2em; vertical-align: -0.2em; flex: none; }
+h3 .ic { width: 15px; height: 15px; }
+.btn .ic { width: 18px; height: 18px; }
+.btn-sm .ic { width: 14px; height: 14px; }
+.badge .ic { width: 12px; height: 12px; vertical-align: -0.15em; }
 .sub { color: var(--ink-2); font-size: 14px; margin: 0 0 16px; }
 
 .btn {

@@ -43,7 +43,8 @@
   #qr img, #qr canvas { width: 240px !important; height: 240px !important; }
   .url { font-size: 13px; color: #777; word-break: break-all; margin: 0; }
   .perks { margin: 18px 0 0; padding-left: 4px; font-size: 14px; color: #333; text-align: left; list-style: none; }
-  .perks li { margin: 6px 0; }
+  .perks li { margin: 7px 0; display: flex; align-items: center; gap: 9px; }
+  .perks svg { width: 16px; height: 16px; flex: none; color: var(--gold-deep); }
   .actions { margin-top: 22px; display: flex; gap: 10px; justify-content: center; }
   .btn {
     border: none; border-radius: 12px; padding: 12px 18px; font-size: 15px;
@@ -66,12 +67,12 @@
     <div class="qr-frame"><div id="qr"></div></div>
     <p class="url" id="url-label"></p>
     <ul class="perks">
-      <li>📊 Sua conta na mesa em tempo real</li>
-      <li>⛽ Bônus gasolina e 🍔 bônus comida por tempo de jogo</li>
-      <li>📲 Instale como app na tela inicial</li>
+      <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"/><path d="m7 14 4-4 3 3 5-6"/></svg>Sua conta na mesa em tempo real</li>
+      <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 22h12M4 9h10M14 22V4a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v18"/><path d="M14 13h2a2 2 0 0 1 2 2v2a2 2 0 0 0 4 0V9.8a2 2 0 0 0-.6-1.4L18 5"/></svg>Bônus gasolina e bônus comida por tempo de jogo</li>
+      <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V3M6 9l6 6 6-6"/><path d="M19 21H5"/></svg>Instale como app na tela inicial</li>
     </ul>
     <div class="actions">
-      <button class="btn btn-gold" onclick="window.print()">🖨️ Imprimir</button>
+      <button class="btn btn-gold" onclick="window.print()">Imprimir</button>
       <button class="btn btn-ghost" onclick="location.href='./'">Voltar ao app</button>
     </div>
   </div>

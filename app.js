@@ -58,6 +58,7 @@
     lock: '<rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>',
     fuel: '<path d="M3 22h12M4 9h10M14 22V4a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v18"/><path d="M14 13h2a2 2 0 0 1 2 2v2a2 2 0 0 0 4 0V9.8a2 2 0 0 0-.6-1.4L18 5"/>',
     food: '<path d="M3 2v7a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2V2"/><path d="M6 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6a2 2 0 0 0 2 2h3Z"/><path d="M21 15v7"/>',
+    cam: '<rect x="2" y="6" width="14" height="12" rx="2.5"/><path d="m16 10.5 6-4v11l-6-4"/>',
   };
   const ic = (n) => `<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[n] || ''}</svg>`;
 
@@ -703,6 +704,11 @@
     $app.innerHTML = `
       <h1>Mesa ao vivo ${st.c && st.c.status === 'open' ? '<span class="badge open">aberta</span>' : '<span class="badge">fechada</span>'}</h1>
       ${sessionPicker()}
+      ${C.STREAM_EMBED_URL ? `
+      <div class="card">
+        <h3>${ic('cam')} Transmissão da mesa</h3>
+        <div class="stream-wrap"><iframe src="${esc(C.STREAM_EMBED_URL)}" title="Transmissão ao vivo da mesa" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen loading="lazy"></iframe></div>
+      </div>` : ''}
       ${liveTiles(st)}
       <div class="card">
         <h3>Últimas mãos (rake)</h3>

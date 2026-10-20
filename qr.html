@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>QR da Mesa</title>
+<style>
+  :root { --bg: #0b1512; --ink: #eef5f1; --gold: #e8c15a; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; min-height: 100dvh; background: var(--bg); color: var(--ink);
+    font: 16px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    display: flex; align-items: center; justify-content: center; padding: 24px 16px;
+  }
+  .sheet {
+    background: #fff; color: #111; border-radius: 20px; padding: 36px 32px;
+    text-align: center; max-width: 420px; width: 100%;
+  }
+  .sheet h1 { font-size: 26px; margin: 0 0 4px; }
+  .sheet .sub { color: #555; font-size: 15px; margin: 0 0 22px; }
+  #qr { display: flex; justify-content: center; margin: 0 auto 20px; }
+  #qr img, #qr canvas { width: 260px !important; height: 260px !important; }
+  .url { font-size: 13px; color: #777; word-break: break-all; }
+  .perks { margin: 18px 0 0; font-size: 14px; color: #333; text-align: left; }
+  .perks li { margin: 4px 0; }
+  .actions { margin-top: 22px; display: flex; gap: 10px; justify-content: center; }
+  .btn {
+    border: none; border-radius: 12px; padding: 12px 18px; font-size: 15px;
+    font-weight: 700; cursor: pointer;
+  }
+  .btn-gold { background: var(--gold); color: #0b1512; }
+  .btn-ghost { background: #eee; color: #333; }
+  @media print {
+    body { background: #fff; padding: 0; }
+    .sheet { box-shadow: none; max-width: none; }
+    .actions { display: none; }
+  }
+</style>
+</head>
+<body>
+  <div class="sheet">
+    <h1>♠ Mesa Poker</h1>
+    <p class="sub">Aponte a câmera do celular e acompanhe a mesa ao vivo</p>
+    <div id="qr"></div>
+    <p class="url" id="url-label"></p>
+    <ul class="perks">
+      <li>📊 Sua conta na mesa em tempo real</li>
+      <li>⛽ Bônus gasolina e 🍔 bônus comida por tempo de jogo</li>
+      <li>📲 Instale como app na tela inicial</li>
+    </ul>
+    <div class="actions">
+      <button class="btn btn-gold" onclick="window.print()">🖨️ Imprimir</button>
+      <button class="btn btn-ghost" onclick="location.href='./'">Voltar ao app</button>
+    </div>
+  </div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script>
+    var target = location.origin + '/';
+    document.getElementById('url-label').textContent = target;
+    new QRCode(document.getElementById('qr'), {
+      text: target, width: 260, height: 260,
+      colorDark: '#0b1512', colorLight: '#ffffff',
+      correctLevel: QRCode.CorrectLevel.M
+    });
+  </script>
+</body>
+</html>

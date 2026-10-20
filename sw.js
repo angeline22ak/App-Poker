@@ -1,5 +1,5 @@
 /* Service worker — Mesa Poker */
-const CACHE = 'mesa-poker-v1';
+const CACHE = 'mesa-poker-v2';
 const SHELL = [
   './',
   'index.html',
@@ -7,6 +7,7 @@ const SHELL = [
   'app.js',
   'config.js',
   'manifest.webmanifest',
+  'qr.html',
   'icons/icon-192.png',
   'icons/icon-512.png',
 ];

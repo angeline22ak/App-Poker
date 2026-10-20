@@ -12,7 +12,7 @@
     playerId: localStorage.getItem('pk_player_id'),
     playerName: localStorage.getItem('pk_player_name'),
     sessionId: localStorage.getItem('pk_session_id'),
-    sessions: [], players: [], tx: [], rakes: [],
+    sessions: [], players: [], tx: [], rakes: [], rules: [], awards: [],
     adminTab: 'mesa',
     chipCounts: {}, pot: 0,
     rt: false, timer: null,
@@ -43,11 +43,14 @@
 
   // ---------- dados ----------
   async function loadAll() {
-    const [se, pl] = await Promise.all([
+    const [se, pl, br, ba] = await Promise.all([
       supa.from('poker_sessions').select('*').order('created_at', { ascending: false }).limit(100),
       supa.from('poker_players').select('id,name,created_at').order('name'),
+      supa.from('poker_bonus_rules').select('*').order('type'),
+      supa.from('poker_bonus_awards').select('*').eq('voided', false).order('earned_at', { ascending: false }).limit(500),
     ]);
     S.sessions = se.data || []; S.players = pl.data || [];
+    S.rules = br.data || []; S.awards = ba.data || [];
     if (!S.sessions.find(x => x.id === S.sessionId)) S.sessionId = null;
     if (!S.sessionId) {
       const open = S.sessions.find(x => x.status === 'open');
@@ -73,6 +76,8 @@
       .on('postgres_changes', { event: '*', schema: 'public', table: 'poker_transactions' }, refresh)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'poker_rake_entries' }, refresh)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'poker_sessions' }, refresh)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'poker_bonus_rules' }, refresh)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'poker_bonus_awards' }, refresh)
       .subscribe((st) => {
         S.rt = st === 'SUBSCRIBED';
         const dot = document.getElementById('live-dot');
@@ -233,7 +238,7 @@
   function renderAdmin() {
     if (!S.adminPin) return go('adminLogin');
     const st = stats();
-    const tabs = [['mesa', 'Mesa'], ['caixa', 'Caixa'], ['jog', 'Jogadores'], ['cfg', 'Config']];
+    const tabs = [['mesa', 'Mesa'], ['caixa', 'Caixa'], ['jog', 'Jogadores'], ['bonus', 'Bônus'], ['cfg', 'Config']];
     $app.innerHTML = `
       <h1>Painel do admin</h1>
       ${sessionPicker()}
@@ -245,6 +250,7 @@
     if (S.adminTab === 'mesa') renderTabMesa(body, st);
     else if (S.adminTab === 'caixa') renderTabCaixa(body, st);
     else if (S.adminTab === 'jog') renderTabJog(body, st);
+    else if (S.adminTab === 'bonus') renderTabBonus(body, st);
     else renderTabCfg(body, st);
   }
 
@@ -412,6 +418,119 @@
     };
   }
 
+  // ---------- BÔNUS ----------
+  const BONUS_ICON = { gasolina: '⛽', comida: '🍔' };
+  const bIcon = (t) => BONUS_ICON[t] || '🎁';
+  const hhmm = (min) => `${Math.floor(min / 60)}h${String(Math.round(min) % 60).padStart(2, '0')}`;
+
+  function bonusStatus(a) {
+    if (a.redeemed_at) return { label: 'usado', cls: '' };
+    if (a.expires_at && new Date(a.expires_at) < new Date()) return { label: 'vencido', cls: 'bad' };
+    return { label: 'ativo', cls: 'open' };
+  }
+
+  // minutos de mesa do jogador na sessão atual (1º lançamento → fechamento/agora)
+  function minutesAtTable(pid) {
+    const mine = S.tx.filter(t => t.player_id === pid);
+    if (!mine.length) return 0;
+    const first = Math.min(...mine.map(t => +new Date(t.created_at)));
+    const c = cur();
+    const end = c && c.closed_at ? +new Date(c.closed_at) : Date.now();
+    return Math.max(0, (end - first) / 60000);
+  }
+
+  function renderTabBonus(el) {
+    const c = cur();
+    const rules = S.rules;
+    const inSession = S.players.filter(p => S.tx.some(t => t.player_id === p.id));
+    const hasAward = (pid, type) => S.awards.some(a => a.player_id === pid && a.type === type && a.session_id === S.sessionId);
+    el.innerHTML = `
+      <div class="card">
+        <h3>🎁 Regras dos bônus</h3>
+        <p class="sub">O jogador ganha ao completar o tempo mínimo de mesa. A validade conta a partir do dia em que ganhou.</p>
+        ${rules.map(r => `
+        <div class="bonus-rule" data-type="${esc(r.type)}">
+          <h3>${bIcon(r.type)} ${esc(r.label)}</h3>
+          <div class="rule-grid">
+            <div><label>Valor (R$)</label><input class="br-amount" inputmode="decimal" value="${r.amount}"></div>
+            <div><label>Tempo mín. (min)</label><input class="br-min" inputmode="numeric" value="${r.min_minutes}"></div>
+            <div><label>Validade (dias)</label><input class="br-days" inputmode="numeric" value="${r.valid_days}"></div>
+          </div>
+          <div class="btn-row">
+            <label class="chk"><input type="checkbox" class="br-active" ${r.active ? 'checked' : ''}> ativo</label>
+            <button class="btn btn-sm br-save">Salvar</button>
+          </div>
+        </div>`).join('') || '<p class="sub">Nenhuma regra cadastrada.</p>'}
+      </div>
+      <div class="card">
+        <h3>⏱️ Quem já pode ganhar (mesa atual)</h3>
+        <div class="list">${!c ? '<p class="sub">Nenhuma mesa selecionada.</p>' : inSession.map(p => {
+          const min = minutesAtTable(p.id);
+          return `<div class="row"><div class="grow"><strong>${esc(p.name)}</strong>
+            <div class="when">${hhmm(min)} de mesa</div></div>
+            <div class="bonus-actions">${rules.filter(r => r.active).map(r => {
+              if (hasAward(p.id, r.type)) return `<span class="badge">${bIcon(r.type)} dado</span>`;
+              if (min >= r.min_minutes) return `<button class="btn btn-sm btn-primary" data-award="${p.id}" data-bt="${esc(r.type)}">${bIcon(r.type)} dar ${fmt(r.amount)}</button>`;
+              return `<span class="badge">${bIcon(r.type)} falta ${hhmm(r.min_minutes - min)}</span>`;
+            }).join(' ')}</div>
+          </div>`;
+        }).join('') || '<p class="sub">Nenhum jogador com movimento nesta mesa.</p>'}</div>
+      </div>
+      <div class="card">
+        <h3>Bônus concedidos</h3>
+        <div class="list">${S.awards.map(a => {
+          const p = S.players.find(x => x.id === a.player_id);
+          const stt = bonusStatus(a);
+          return `<div class="row">
+            <div class="grow"><strong>${esc(p ? p.name : '?')}</strong> ${bIcon(a.type)} ${fmt(a.amount)}
+              <span class="badge ${stt.cls}">${stt.label}</span>
+              <div class="when">${whenFull(a.earned_at)}${a.expires_at ? ' · vale até ' + whenFull(a.expires_at) : ''}</div></div>
+            ${!a.redeemed_at ? `<button class="btn btn-sm" data-redeem="${a.id}">usar</button>` : ''}
+            <button class="btn btn-sm" data-expiry="${a.id}">✎</button>
+            <button class="x-btn" data-void-bonus="${a.id}">✕</button>
+          </div>`;
+        }).join('') || '<p class="sub">Nenhum bônus concedido ainda.</p>'}</div>
+      </div>`;
+    el.querySelectorAll('.bonus-rule .br-save').forEach(btn => btn.onclick = async () => {
+      const box = btn.closest('.bonus-rule');
+      try {
+        await rpc('poker_update_bonus_rule', {
+          p_admin_pin: S.adminPin, p_type: box.dataset.type,
+          p_amount: num(box.querySelector('.br-amount').value) || null,
+          p_min_minutes: parseInt(box.querySelector('.br-min').value, 10) || null,
+          p_valid_days: parseInt(box.querySelector('.br-days').value, 10) || null,
+          p_active: box.querySelector('.br-active').checked,
+        });
+        toast('Regra salva'); await loadAll(); render();
+      } catch (e) { toast(e.message, true); }
+    });
+    el.querySelectorAll('[data-award]').forEach(b => b.onclick = async () => {
+      const r = S.rules.find(x => x.type === b.dataset.bt);
+      const exp = new Date(Date.now() + (r ? r.valid_days : 7) * 864e5).toISOString();
+      try {
+        await rpc('poker_award_bonus', { p_admin_pin: S.adminPin, p_player_id: b.dataset.award, p_session_id: S.sessionId, p_type: b.dataset.bt, p_amount: null, p_expires_at: exp });
+        toast('Bônus concedido 🎁'); await loadAll(); render();
+      } catch (e) { toast(e.message, true); }
+    });
+    el.querySelectorAll('[data-redeem]').forEach(b => b.onclick = async () => {
+      if (!confirm('Marcar este bônus como usado?')) return;
+      try { await rpc('poker_redeem_bonus', { p_admin_pin: S.adminPin, p_id: b.dataset.redeem }); toast('Bônus usado'); await loadAll(); render(); }
+      catch (e) { toast(e.message, true); }
+    });
+    el.querySelectorAll('[data-expiry]').forEach(b => b.onclick = async () => {
+      const d = prompt('Validade: quantos dias a partir de hoje? (vazio = sem prazo)');
+      if (d === null) return;
+      const exp = d.trim() === '' ? null : new Date(Date.now() + num(d) * 864e5).toISOString();
+      try { await rpc('poker_set_bonus_expiry', { p_admin_pin: S.adminPin, p_id: b.dataset.expiry, p_expires_at: exp }); toast('Prazo atualizado'); await loadAll(); render(); }
+      catch (e) { toast(e.message, true); }
+    });
+    el.querySelectorAll('[data-void-bonus]').forEach(b => b.onclick = async () => {
+      if (!confirm('Cancelar este bônus?')) return;
+      try { await rpc('poker_void_bonus', { p_admin_pin: S.adminPin, p_id: b.dataset.voidBonus }); await loadAll(); render(); }
+      catch (e) { toast(e.message, true); }
+    });
+  }
+
   function renderTabCfg(el, st) {
     const c = st.c;
     const chips = c ? (c.chip_values || []) : [];
@@ -444,12 +563,18 @@
         ${c.status === 'open' ? '<button class="btn btn-danger btn-block" id="cfg-close" style="margin-top:10px">🔒 Fechar mesa</button>' : ''}
       </div>` : ''}
       <div class="card">
+        <h3>📱 QR Code da mesa</h3>
+        <p class="sub">Imprima e deixe na mesa — o jogador escaneia e cai direto no app.</p>
+        <button class="btn btn-block" id="open-qr">Abrir página do QR (imprimir)</button>
+      </div>
+      <div class="card">
         <h3>🔑 Trocar PIN do admin</h3>
         <label>Novo PIN (4 a 8 dígitos)</label>
         <input id="new-pin" inputmode="numeric" placeholder="novo PIN">
         <button class="btn btn-block" id="pin-save">Trocar PIN</button>
       </div>`;
     document.getElementById('mk-sess').onclick = createSession;
+    document.getElementById('open-qr').onclick = () => window.open('qr.html', '_blank');
     const addBtn = document.getElementById('chip-add');
     if (addBtn) addBtn.onclick = () => {
       const ed = document.getElementById('chip-editor');
@@ -531,6 +656,17 @@
           return `<div class="row"><div class="grow"><span class="badge">${label}</span><div class="when">${whenFull(t.created_at)}</div></div>
             <span class="amount ${isOut ? 'out' : 'in'}">${isOut ? '−' : '+'}${fmt(t.amount)}</span></div>`;
         }).join('') || '<p class="sub">Nenhum movimento nesta mesa.</p>'}</div>
+      </div>
+      <div class="card">
+        <h3>🎁 Meus bônus</h3>
+        <div class="list">${S.awards.filter(a => a.player_id === S.playerId).map(a => {
+          const stt = bonusStatus(a);
+          return `<div class="row"><div class="grow">${bIcon(a.type)} <strong>${fmt(a.amount)}</strong>
+            <span class="badge ${stt.cls}">${stt.label}</span>
+            <div class="when">${a.redeemed_at ? 'usado em ' + whenFull(a.redeemed_at) : a.expires_at ? 'vale até ' + whenFull(a.expires_at) : 'sem prazo'}</div></div></div>`;
+        }).join('') || '<p class="sub">Você ainda não ganhou bônus — fique na mesa e acumule tempo de jogo!</p>'}</div>
+        ${S.rules.filter(r => r.active).length ? `<p class="sub" style="margin:10px 0 0">${S.rules.filter(r => r.active).map(r =>
+          `${bIcon(r.type)} ${esc(r.label)}: ${fmt(r.amount)} após ${hhmm(r.min_minutes)} de mesa (vale ${r.valid_days} dias)`).join(' · ')}</p>` : ''}
       </div>
       <h2>A mesa agora</h2>
       ${liveTiles(st)}`;

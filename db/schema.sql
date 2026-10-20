@@ -200,5 +200,81 @@ returns void language sql security definer set search_path = public, extensions 
   update poker_rake_entries set voided = p_void where id = p_id;
 $$;
 
+-- ------------------------------ bônus ------------------------------
+-- Bônus por tempo de mesa (ex.: gasolina R$25 após 3h; comida R$50 após 5h),
+-- com validade em dias e prazo ajustável por jogador.
+
+create table public.poker_bonus_rules (
+  type text primary key,                       -- 'gasolina' | 'comida' | ...
+  label text not null,
+  amount numeric not null check (amount >= 0),
+  min_minutes int not null default 180,        -- tempo mínimo de mesa
+  valid_days int not null default 7,           -- validade padrão ao conceder
+  active boolean not null default true
+);
+
+create table public.poker_bonus_awards (
+  id uuid primary key default gen_random_uuid(),
+  player_id uuid not null references public.poker_players(id) on delete cascade,
+  session_id uuid references public.poker_sessions(id) on delete set null,
+  type text not null,
+  amount numeric not null check (amount >= 0),
+  earned_at timestamptz not null default now(),
+  expires_at timestamptz,                      -- prazo individual (editável)
+  redeemed_at timestamptz,                     -- quando foi usado
+  voided boolean not null default false        -- cancelamento (nada é apagado)
+);
+
+alter table public.poker_bonus_rules enable row level security;
+alter table public.poker_bonus_awards enable row level security;
+create policy "poker read bonus rules" on public.poker_bonus_rules for select to anon, authenticated using (true);
+create policy "poker read bonus awards" on public.poker_bonus_awards for select to anon, authenticated using (true);
+
+alter publication supabase_realtime add table public.poker_bonus_rules, public.poker_bonus_awards;
+
+insert into poker_bonus_rules (type,label,amount,min_minutes,valid_days,active) values
+  ('gasolina','Bônus Gasolina',25,180,7,true),
+  ('comida','Bônus Comida',50,300,7,true)
+on conflict (type) do nothing;
+
+create or replace function public.poker_award_bonus(p_admin_pin text, p_player_id uuid, p_session_id uuid, p_type text, p_amount numeric, p_expires_at timestamptz)
+returns uuid language sql security definer set search_path = public, extensions as $$
+  select poker_req(p_admin_pin);
+  insert into poker_bonus_awards (player_id, session_id, type, amount, expires_at)
+  values (p_player_id, p_session_id, p_type,
+          coalesce(p_amount, (select amount from poker_bonus_rules where type = p_type), 0),
+          p_expires_at)
+  returning id;
+$$;
+
+create or replace function public.poker_redeem_bonus(p_admin_pin text, p_id uuid)
+returns void language sql security definer set search_path = public, extensions as $$
+  select poker_req(p_admin_pin);
+  update poker_bonus_awards set redeemed_at = now() where id = p_id and redeemed_at is null;
+$$;
+
+create or replace function public.poker_void_bonus(p_admin_pin text, p_id uuid, p_void boolean default true)
+returns void language sql security definer set search_path = public, extensions as $$
+  select poker_req(p_admin_pin);
+  update poker_bonus_awards set voided = p_void where id = p_id;
+$$;
+
+create or replace function public.poker_update_bonus_rule(p_admin_pin text, p_type text, p_amount numeric, p_min_minutes int, p_valid_days int, p_active boolean)
+returns void language sql security definer set search_path = public, extensions as $$
+  select poker_req(p_admin_pin);
+  update poker_bonus_rules set
+    amount = coalesce(p_amount, amount),
+    min_minutes = coalesce(p_min_minutes, min_minutes),
+    valid_days = coalesce(p_valid_days, valid_days),
+    active = coalesce(p_active, active)
+  where type = p_type;
+$$;
+
+create or replace function public.poker_set_bonus_expiry(p_admin_pin text, p_id uuid, p_expires_at timestamptz)
+returns void language sql security definer set search_path = public, extensions as $$
+  select poker_req(p_admin_pin);
+  update poker_bonus_awards set expires_at = p_expires_at where id = p_id;
+$$;
+
 -- PIN inicial do admin (trocar no app em Config → Trocar PIN)
 insert into poker_settings (admin_pin_hash) values (extensions.crypt('864401', extensions.gen_salt('bf')));

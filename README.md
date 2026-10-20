@@ -13,6 +13,12 @@ do admin e conta do jogador atualizadas **em tempo real**.
   resultado — e as estatísticas da mesa.
 - **Mesa ao vivo (público):** rake total, rake médio/mão, % média da casa,
   rake/hora, dinheiro na mesa, últimas mãos.
+- **Bônus por tempo de mesa:** regras configuráveis (ex.: ⛽ gasolina R$25 após
+  3h, 🍔 comida R$50 após 5h, validade em dias). O admin vê quem já completou o
+  tempo mínimo e concede com um toque; dá para marcar como usado, mudar o prazo
+  por jogador ou cancelar. O jogador acompanha os próprios bônus na conta.
+- **QR Code da mesa:** página imprimível (`/qr.html`) com o QR que leva direto
+  ao app — deixe na mesa para os jogadores escanearem.
 - **PWA instalável:** botão "Instalar na tela inicial" (Android/Chrome mostra o
   prompt nativo; iOS mostra o passo a passo de Compartilhar → Adicionar à Tela de Início).
 - **Tempo real:** Supabase Realtime — qualquer lançamento aparece em todos os

@@ -180,6 +180,18 @@ table.mini th { text-align: left; color: var(--ink-2); font-size: 11px; padding:
 table.mini td { padding: 7px 8px; border-bottom: 1px solid var(--border); font-variant-numeric: tabular-nums; }
 table.mini tr:last-child td { border-bottom: none; }
 
+/* Bônus */
+.bonus-rule {
+  background: var(--surface-2); border: 1px solid var(--border);
+  border-radius: 12px; padding: 12px; margin-bottom: 10px;
+}
+.rule-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.rule-grid input { margin-bottom: 4px; }
+.chk { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; padding: 8px 0; flex: 1; }
+.chk input { width: auto; margin: 0; }
+.badge.bad { color: var(--bad); border-color: #5a332c; }
+.bonus-actions { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+
 @media (min-width: 560px) {
   .tiles { grid-template-columns: repeat(3, 1fr); }
   .tile.hero { grid-column: 1 / -1; }
